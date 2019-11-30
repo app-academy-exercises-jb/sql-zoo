@@ -1,0 +1,84 @@
+# == Schema Information
+#
+# Table name: actors
+#
+#  id          :integer      not null, primary key
+#  name        :string
+#
+# Table name: movies
+#
+#  id          :integer      not null, primary key
+#  title       :string
+#  yr          :integer
+#  score       :float
+#  votes       :integer
+#  director_id :integer
+#
+# Table name: castings
+#
+#  movie_id    :integer      not null, primary key
+#  actor_id    :integer      not null, primary key
+#  ord         :integer
+
+
+
+--------------------------------official solve------------------------------------
+  SELECT
+    movies.title,
+    actors.name
+  FROM
+    movies
+  JOIN
+    castings ON movies.id = castings.movie_id
+  JOIN
+    actors ON actors.id = castings.actor_id
+  WHERE
+    movies.id IN (
+      SELECT
+        movies.id
+      FROM
+        movies
+      JOIN
+        castings ON movies.id = castings.movie_id
+      JOIN
+        actors ON actors.id = castings.actor_id
+      WHERE
+        actors.name = 'Julie Andrews'
+    ) AND castings.ord = 1
+-----------------------------------my solve----------------------------------------
+    WITH
+      julie AS (
+        SELECT
+          id
+        FROM
+          actors
+        WHERE
+          name = 'Julie Andrews'
+      ),
+      julies_films AS (
+        SELECT
+          castings.movie_id
+        FROM
+          castings
+        INNER JOIN
+          julie ON castings.actor_id = julie.id
+      ),
+      films_and_stars AS (
+        SELECT
+          castings.movie_id, castings.actor_id
+        FROM
+          castings
+        INNER JOIN
+          julies_films ON castings.movie_id = julies_films.movie_id
+        WHERE 
+          ord = 1
+      )
+    SELECT
+      title, name
+    FROM
+      films_and_stars
+    INNER JOIN
+      actors ON films_and_stars.actor_id = actors.id
+    INNER JOIN
+      movies ON films_and_stars.movie_id = movies.id
+
